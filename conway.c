@@ -98,7 +98,7 @@ void conwayLoop()
         system("cls");
         printCells();
         updateCells();
-        sleep(1);
+        usleep(0.25);
     }
 }
 
