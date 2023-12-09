@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <unistd.h>
+#include <string.h>
 
 #define MAX_X_POS 100
 #define MAX_Y_POS 35
@@ -19,6 +20,7 @@ struct Cell
     int y;
 };
 
+struct Cell *parseInitialCoordinates(char *s, int *);
 void initMatrix();
 void setInitialCells(struct Cell c[], size_t);
 void conwayLoop();
@@ -31,66 +33,87 @@ int main()
     int initialCellsCount = 0;
     bool exit = false;
 
-    struct Cell pointList[MAX_Y_POS * MAX_X_POS];
+    char s[1000];
+    printf("Input a comma-separated list of x and y coordinates to set the initial cells:\n");
+    scanf("%1000[^\n]", s);
 
-    while (!exit)
-    {
-        struct Cell p;
-
-        int xCoord = 0;
-        int yCoord = 0;
-
-        printf_s("\nInput the x and y coordinates of cell #%d: \n", (initialCellsCount + 1));
-        scanf("%d %d", &xCoord, &yCoord);
-
-        p.x = xCoord;
-        p.y = yCoord;
-
-        pointList[initialCellsCount] = p;
-        initialCellsCount++;
-
-        fflush(stdin);
-
-        bool subExit = false;
-
-        if (initialCellsCount >= MAX_Y_POS * MAX_X_POS)
-        {
-            exit = true;
-            subExit = true;
-        }
-
-        while (!subExit)
-        {
-            char opt;
-            printf("\n\nDo you want to input more cells? y/n\n");
-            scanf(" %c", &opt);
-
-            fflush(stdin);
-
-            switch (opt)
-            {
-            case 'Y':
-            case 'y':
-                subExit = true;
-                break;
-            case 'n':
-            case 'N':
-                exit = true;
-                subExit = true;
-                break;
-            default:
-                printf("Invalid option\n");
-            }
-        }
-    }
+    struct Cell *initialCells = parseInitialCoordinates(s, &initialCellsCount);
 
     initMatrix();
-    setInitialCells(pointList, initialCellsCount);
+    setInitialCells(initialCells, initialCellsCount);
     conwayLoop();
 
     return 0;
 }
 
+struct Cell *parseInitialCoordinates(char *s, int *initialCellsCount)
+{
+    char **coordinates = (char **)malloc(sizeof(char *) * (MAX_X_POS * MAX_Y_POS));
+
+    if (coordinates == NULL)
+    {
+        perror("Memory allocation failed. Exiting now");
+        exit(EXIT_FAILURE);
+    }
+
+    char *input = strdup(s);
+
+    if (input == NULL)
+    {
+        perror("Memory allocation failed. Exiting now");
+        exit(EXIT_FAILURE);
+    }
+
+    int count = 0;
+    char *coordinate = strtok(input, ",");
+
+    while (coordinate != NULL && count < MAX_X_POS * MAX_Y_POS)
+    {
+        coordinates[count] = strdup(coordinate);
+
+        if (coordinates[count] == NULL)
+        {
+            perror("Memory allocation failed. Exiting now");
+            exit(EXIT_FAILURE);
+        }
+
+        count++;
+
+        // Pass null to make it continue tokenizing from where it left off in the same string
+        coordinate = strtok(NULL, ",");
+    }
+
+    coordinates[count] = NULL;
+    free(input);
+
+    struct Cell *cellList = malloc(sizeof(struct Cell) * (MAX_X_POS * MAX_Y_POS));
+
+    if (cellList == NULL)
+    {
+        perror("Memory allocation failed. Exiting now");
+        exit(EXIT_FAILURE);
+    }
+
+    int i = 0;
+    while (coordinates[i] != NULL)
+    {
+        int x, y;
+        // Use sscanf to parse integer values directly
+        if (sscanf(coordinates[i], "%d %d", &x, &y) == 2)
+        {
+            struct Cell c;
+            c.x = x;
+            c.y = y;
+            cellList[i] = c;
+            i++;
+        }
+    }
+
+    *initialCellsCount = i;
+    free(coordinates);
+
+    return cellList;
+}
 void conwayLoop()
 {
 
