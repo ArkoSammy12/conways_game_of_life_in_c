@@ -145,10 +145,6 @@ void printCells()
 */
 int countNeighbors(int y, int x)
 {
-    int yStart = y + 1;
-    int yEnd = y - 1;
-    int xStart = x - 1;
-    int xEnd = x + 1;
 
     int checkCoords[8][2] = {
         {y + 1, x - 1}, // Up left
