@@ -8,6 +8,7 @@
 
 const char BACKGROUND_CHAR = ' ';
 const char CELL_CHAR = '#';
+const float SLEEP_TIME = 0.40;
 
 char mainMatrix[MAX_Y_POS][MAX_X_POS];
 char neighborCountBuffer[MAX_Y_POS][MAX_X_POS]; // Keep track of the amount of neighbors that each cell has separately
@@ -98,7 +99,7 @@ void conwayLoop()
         system("cls");
         printCells();
         updateCells();
-        usleep(0.30);
+        usleep(SLEEP_TIME);
     }
 }
 
