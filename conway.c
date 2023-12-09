@@ -33,9 +33,9 @@ int main()
     int initialCellsCount = 0;
     bool exit = false;
 
-    char s[1000];
+    char s[10000];
     printf("Input a comma-separated list of x and y coordinates to set the initial cells:\n");
-    scanf("%1000[^\n]", s);
+    scanf("%10000[^\n]", s);
 
     struct Cell *initialCells = parseInitialCoordinates(s, &initialCellsCount);
 
@@ -48,7 +48,7 @@ int main()
 
 struct Cell *parseInitialCoordinates(char *s, int *initialCellsCount)
 {
-    char **coordinates = (char **)malloc(sizeof(char *) * (MAX_X_POS * MAX_Y_POS));
+    char **coordinates = (char **)calloc(MAX_X_POS * MAX_Y_POS, sizeof(char *));
 
     if (coordinates == NULL)
     {
@@ -86,7 +86,7 @@ struct Cell *parseInitialCoordinates(char *s, int *initialCellsCount)
     coordinates[count] = NULL;
     free(input);
 
-    struct Cell *cellList = malloc(sizeof(struct Cell) * (MAX_X_POS * MAX_Y_POS));
+    struct Cell *cellList = calloc(MAX_X_POS * MAX_Y_POS, sizeof(struct Cell));
 
     if (cellList == NULL)
     {
@@ -105,8 +105,8 @@ struct Cell *parseInitialCoordinates(char *s, int *initialCellsCount)
             c.x = x;
             c.y = y;
             cellList[i] = c;
-            i++;
         }
+        i++;
     }
 
     *initialCellsCount = i;
