@@ -9,19 +9,19 @@
 
 const char BACKGROUND_CHAR = ' ';
 const char CELL_CHAR = '#';
-const float SLEEP_TIME = 0.40;
+const double SLEEP_TIME = 0.40;
 
 char mainMatrix[MAX_Y_POS][MAX_X_POS];
-char neighborCountBuffer[MAX_Y_POS][MAX_X_POS]; // Keep track of the amount of neighbors that each cell has separately
+int neighborCountBuffer[MAX_Y_POS][MAX_X_POS]; // Keep track of the amount of neighbors that each cell has separately
 
-struct Cell{
+typedef struct {
     int x;
     int y;
-};
+} Cell;
 
-struct Cell *parseInitialCoordinates(char *s, int *);
+Cell *parseInitialCoordinates(char *s, int *);
 void initMatrix();
-void setInitialCells(struct Cell c[], size_t);
+void setInitialCells(Cell initialCells[], size_t);
 void conwayLoop();
 void updateCells();
 void printCells();
@@ -29,22 +29,23 @@ int countNeighbors(int, int);
 
 int main(){
     int initialCellsCount = 0;
-    bool exit = false;
+    bool exit;
 
     char s[10000];
     printf("Input a comma-separated list of x and y coordinates to set the initial cells:\n");
     scanf("%10000[^\n]", s);
 
-    struct Cell *initialCells = parseInitialCoordinates(s, &initialCellsCount);
+    Cell *initialCells = parseInitialCoordinates(s, &initialCellsCount);
 
     initMatrix();
     setInitialCells(initialCells, initialCellsCount);
     conwayLoop();
+    free(initialCells);
 
     return 0;
 }
 
-struct Cell *parseInitialCoordinates(char *s, int *initialCellsCount){
+Cell *parseInitialCoordinates(char *s, int *initialCellsCount){
     char **coordinates = (char **)calloc(MAX_X_POS * MAX_Y_POS, sizeof(char *));
 
     if (coordinates == NULL){
@@ -79,7 +80,7 @@ struct Cell *parseInitialCoordinates(char *s, int *initialCellsCount){
     coordinates[count] = NULL;
     free(input);
 
-    struct Cell *cellList = calloc(MAX_X_POS * MAX_Y_POS, sizeof(struct Cell));
+    Cell *cellList = calloc(MAX_X_POS * MAX_Y_POS, sizeof(Cell));
 
     if (cellList == NULL){
         perror("Memory allocation failed. Exiting now");
@@ -91,7 +92,7 @@ struct Cell *parseInitialCoordinates(char *s, int *initialCellsCount){
         int x, y;
         // Use sscanf to parse integer values directly
         if (sscanf(coordinates[i], "%d %d", &x, &y) == 2){
-            struct Cell c;
+            Cell c;
             c.x = x;
             c.y = y;
             cellList[i] = c;
@@ -124,10 +125,10 @@ void initMatrix(){
 /*
     Place initial alive cells in the matrix
 */
-void setInitialCells(struct Cell cellList[], size_t size){
+void setInitialCells(Cell cellList[], size_t size){
 
     for (int i = 0; i < size; i++){
-        struct Cell c = cellList[i];
+        Cell c = cellList[i];
         mainMatrix[c.y][c.x] = CELL_CHAR;
     }
 }
@@ -145,17 +146,17 @@ void printCells(){
 /*
     Count surrounding cells for alive neighbors
 */
-int countNeighbors(int y, int x){
+int countNeighbors(int posY, int posX){
 
     int checkCoords[8][2] = {
-        {y + 1, x - 1}, // Up left
-        {y + 1, x},     // Up
-        {y + 1, x + 1}, // Up right
-        {y, x + 1},     // Right
-        {y - 1, x + 1}, // Down right
-        {y - 1, x},     // Down
-        {y - 1, x - 1}, // Down left
-        {y, x - 1}};    // Left
+        {posY + 1, posX - 1}, // Up left
+        {posY + 1, posX},     // Up
+        {posY + 1, posX + 1}, // Up right
+        {posY, posX + 1},     // Right
+        {posY - 1, posX + 1}, // Down right
+        {posY - 1, posX},     // Down
+        {posY - 1, posX - 1}, // Down left
+        {posY, posX - 1}};    // Left
 
     int neighbors = 0;
 
